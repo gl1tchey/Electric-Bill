@@ -1,305 +1,144 @@
-from tkinter import *
+"""register_page.py
 
-window = Tk()
-
-height = 650
-width = 1240
-x = (window.winfo_screenwidth() // 2) - (width // 2)
-y = (window.winfo_screenheight() // 4) - (height // 4)
-window.geometry('{}x{}+{}+{}'.format(width, height, x, y))
-
-window.configure(bg="#525561")
-
-# ================Background Image ====================
-backgroundImage = PhotoImage(file="assets/image_1.png")
-bg_image = Label(
-    window,
-    image=backgroundImage,
-    bg="#525561"
-)
-bg_image.place(x=120, y=28)
-
-# ================ Header Text Left ====================
-headerText_image_left = PhotoImage(file="assets/headerText_image.png")
-headerText_image_label1 = Label(
-    bg_image,
-    image=headerText_image_left,
-    bg="#272A37"
-)
-headerText_image_label1.place(x=60, y=45)
-
-headerText1 = Label(
-    bg_image,
-    text="Electric Bill Calculator",
-    fg="#FFFFFF",
-    font=("yu gothic ui bold", 20 * -1),
-    bg="#272A37"
-)
-headerText1.place(x=110, y=45)
-
-# ================ Header Text Right ====================
-headerText_image_right = PhotoImage(file="assets/headerText_image.png")
-headerText_image_label2 = Label(
-    bg_image,
-    image=headerText_image_right,
-    bg="#272A37"
-)
-headerText_image_label2.place(x=400, y=45)
-
-headerText2 = Label(
-    bg_image,
-    anchor="nw",
-    text="CS1C Final PIT",
-    fg="#FFFFFF",
-    font=("yu gothic ui Bold", 20 * -1),
-    bg="#272A37"
-)
-headerText2.place(x=450, y=45)
-
-# ================ CREATE ACCOUNT HEADER ====================
-createAccount_header = Label(
-    bg_image,
-    text="Create new account",
-    fg="#FFFFFF",
-    font=("yu gothic ui Bold", 28 * -1),
-    bg="#272A37"
-)
-createAccount_header.place(x=75, y=121)
-
-# ================ ALREADY HAVE AN ACCOUNT TEXT ====================
-text = Label(
-    bg_image,
-    text="Already a member?",
-    fg="#FFFFFF",
-    font=("yu gothic ui Regular", 15 * -1),
-    bg="#272A37"
-)
-text.place(x=75, y=187)
-
-# ================ GO TO LOGIN ====================
-switchLogin = Button(
-    bg_image,
-    text="Login",
-    fg="#206DB4",
-    font=("yu gothic ui Bold", 15 * -1),
-    bg="#272A37",
-    bd=0,
-    cursor="hand2",
-    activebackground="#272A37",
-    activeforeground="#ffffff"
-)
-switchLogin.place(x=230, y=185, width=50, height=35)
-
-# ================ First Name Section ====================
-firstName_image = PhotoImage(file="assets/input_img.png")
-firstName_image_Label = Label(
-    bg_image,
-    image=firstName_image,
-    bg="#272A37"
-)
-firstName_image_Label.place(x=80, y=242)
-
-firstName_text = Label(
-    firstName_image_Label,
-    text="First name",
-    fg="#FFFFFF",
-    font=("yu gothic ui SemiBold", 13 * -1),
-    bg="#3D404B"
-)
-firstName_text.place(x=25, y=0)
-
-firstName_icon = PhotoImage(file="assets/name_icon.png")
-firstName_icon_Label = Label(
-    firstName_image_Label,
-    image=firstName_icon,
-    bg="#3D404B"
-)
-firstName_icon_Label.place(x=159, y=15)
-
-firstName_entry = Entry(
-    firstName_image_Label,
-    bd=0,
-    bg="#3D404B",
-    highlightthickness=0,
-    font=("yu gothic ui SemiBold", 16 * -1),
-)
-firstName_entry.place(x=8, y=17, width=140, height=27)
+Provides a function to build the registration frame so this UI can be
+embedded inside a larger application instead of running at import time.
+"""
+from tkinter import Frame, Label, Button, Entry, PhotoImage, StringVar, messagebox
+import sqlite3
+from Database import db_utils
 
 
-# ================ Last Name Section ====================
-lastName_image = PhotoImage(file="assets/input_img.png")
-lastName_image_Label = Label(
-    bg_image,
-    image=lastName_image,
-    bg="#272A37"
-)
-lastName_image_Label.place(x=293, y=242)
+def build_register_frame(parent, db_path, on_show_login=None, on_register_success=None):
+    """Create and return a Frame containing the registration UI.
 
-lastName_text = Label(
-    lastName_image_Label,
-    text="Last name",
-    fg="#FFFFFF",
-    font=("yu gothic ui SemiBold", 13 * -1),
-    bg="#3D404B"
-)
-lastName_text.place(x=25, y=0)
+    parent: parent widget (usually a Frame or Tk)
+    db_path: path to sqlite database file
+    on_show_login: callback to switch to login screen
+    on_register_success: callback when registration is successful
+    """
+    frame = Frame(parent, bg="#525561")
 
-lastName_icon = PhotoImage(file="assets/name_icon.png")
-lastName_icon_Label = Label(
-    lastName_image_Label,
-    image=lastName_icon,
-    bg="#3D404B"
-)
-lastName_icon_Label.place(x=159, y=15)
+    # Keep references to images on the frame to avoid garbage collection
+    frame._backgroundImage = PhotoImage(file="assets/image_1.png")
+    bg_image = Label(frame, image=frame._backgroundImage, bg="#525561")
+    bg_image.place(x=120, y=28)
 
-lastName_entry = Entry(
-    lastName_image_Label,
-    bd=0,
-    bg="#3D404B",
-    highlightthickness=0,
-    font=("yu gothic ui SemiBold", 16 * -1),
-)
-lastName_entry.place(x=8, y=17, width=140, height=27)
+    frame._headerText_image_left = PhotoImage(file="assets/headerText_image.png")
+    headerText_image_label1 = Label(bg_image, image=frame._headerText_image_left, bg="#272A37")
+    headerText_image_label1.place(x=60, y=45)
 
-# ================ Email Name Section ====================
-emailName_image = PhotoImage(file="assets/email.png")
-emailName_image_Label = Label(
-    bg_image,
-    image=emailName_image,
-    bg="#272A37"
-)
-emailName_image_Label.place(x=80, y=311)
+    headerText1 = Label(bg_image, text="Electric Bill Calculator", fg="#FFFFFF",
+                        font=("yu gothic ui bold", 20 * -1), bg="#272A37")
+    headerText1.place(x=110, y=45)
 
-emailName_text = Label(
-    emailName_image_Label,
-    text="Email account",
-    fg="#FFFFFF",
-    font=("yu gothic ui SemiBold", 13 * -1),
-    bg="#3D404B"
-)
-emailName_text.place(x=25, y=0)
+    # small link to show login (hook provided by orchestrator)
+    if callable(on_show_login):
+        switchLogin = Button(bg_image, text="Login", fg="#206DB4",
+                             font=("yu gothic ui Bold", 15 * -1), bg="#272A37",
+                             bd=0, cursor="hand2", activebackground="#272A37",
+                             activeforeground="#ffffff", command=on_show_login)
+        switchLogin.place(x=230, y=185, width=50, height=35)
 
-emailName_icon = PhotoImage(file="assets/email-icon.png")
-emailName_icon_Label = Label(
-    emailName_image_Label,
-    image=emailName_icon,
-    bg="#3D404B"
-)
-emailName_icon_Label.place(x=370, y=15)
+    createAccount_header = Label(bg_image, text="Create new account", fg="#FFFFFF",
+                                 font=("yu gothic ui Bold", 28 * -1), bg="#272A37")
+    createAccount_header.place(x=75, y=121)
 
-emailName_entry = Entry(
-    emailName_image_Label,
-    bd=0,
-    bg="#3D404B",
-    highlightthickness=0,
-    font=("yu gothic ui SemiBold", 16 * -1),
-)
-emailName_entry.place(x=8, y=17, width=354, height=27)
+    # Input variables
+    first_var = StringVar()
+    last_var = StringVar()
+    email_var = StringVar()
+    pwd_var = StringVar()
+    confirm_var = StringVar()
 
+    # First / Last name inputs (compact version of original layout)
+    frame._first_img = PhotoImage(file="assets/input_img.png")
+    first_container = Label(bg_image, image=frame._first_img, bg="#272A37")
+    first_container.place(x=80, y=242)
+    Label(first_container, text="First name", fg="#FFFFFF", font=("yu gothic ui SemiBold", 13 * -1),
+          bg="#3D404B").place(x=25, y=0)
+    Entry(first_container, bd=0, bg="#3D404B", highlightthickness=0, font=("yu gothic ui SemiBold", 16 * -1),
+          textvariable=first_var).place(x=8, y=17, width=140, height=27)
 
-# ================ Password Name Section ====================
-passwordName_image = PhotoImage(file="assets/input_img.png")
-passwordName_image_Label = Label(
-    bg_image,
-    image=passwordName_image,
-    bg="#272A37"
-)
-passwordName_image_Label.place(x=80, y=380)
+    last_container = Label(bg_image, image=frame._first_img, bg="#272A37")
+    last_container.place(x=293, y=242)
+    Label(last_container, text="Last name", fg="#FFFFFF", font=("yu gothic ui SemiBold", 13 * -1),
+          bg="#3D404B").place(x=25, y=0)
+    Entry(last_container, bd=0, bg="#3D404B", highlightthickness=0, font=("yu gothic ui SemiBold", 16 * -1),
+          textvariable=last_var).place(x=8, y=17, width=140, height=27)
 
-passwordName_text = Label(
-    passwordName_image_Label,
-    text="Password",
-    fg="#FFFFFF",
-    font=("yu gothic ui SemiBold", 13 * -1),
-    bg="#3D404B"
-)
-passwordName_text.place(x=25, y=0)
+    # Email
+    frame._email_img = PhotoImage(file="assets/email.png")
+    email_container = Label(bg_image, image=frame._email_img, bg="#272A37")
+    email_container.place(x=80, y=311)
+    Label(email_container, text="Email account", fg="#FFFFFF", font=("yu gothic ui SemiBold", 13 * -1),
+          bg="#3D404B").place(x=25, y=0)
+    Entry(email_container, bd=0, bg="#3D404B", highlightthickness=0, font=("yu gothic ui SemiBold", 16 * -1),
+          textvariable=email_var).place(x=8, y=17, width=354, height=27)
 
-passwordName_icon = PhotoImage(file="assets/pass-icon.png")
-passwordName_icon_Label = Label(
-    passwordName_image_Label,
-    image=passwordName_icon,
-    bg="#3D404B"
-)
-passwordName_icon_Label.place(x=159, y=15)
+    # Password
+    frame._pwd_img = PhotoImage(file="assets/input_img.png")
+    pwd_container = Label(bg_image, image=frame._pwd_img, bg="#272A37")
+    pwd_container.place(x=80, y=380)
+    Label(pwd_container, text="Password", fg="#FFFFFF", font=("yu gothic ui SemiBold", 13 * -1),
+          bg="#3D404B").place(x=25, y=0)
+    Entry(pwd_container, bd=0, bg="#3D404B", highlightthickness=0, font=("yu gothic ui SemiBold", 16 * -1),
+          textvariable=pwd_var, show='•').place(x=8, y=17, width=140, height=27)
 
-passwordName_entry = Entry(
-    passwordName_image_Label,
-    bd=0,
-    bg="#3D404B",
-    highlightthickness=0,
-    font=("yu gothic ui SemiBold", 16 * -1),
-)
-passwordName_entry.place(x=8, y=17, width=140, height=27)
+    confirm_container = Label(bg_image, image=frame._pwd_img, bg="#272A37")
+    confirm_container.place(x=293, y=380)
+    Label(confirm_container, text="Confirm Password", fg="#FFFFFF",
+          font=("yu gothic ui SemiBold", 13 * -1), bg="#3D404B").place(x=25, y=0)
+    Entry(confirm_container, bd=0, bg="#3D404B", highlightthickness=0, font=("yu gothic ui SemiBold", 16 * -1),
+          textvariable=confirm_var, show='•').place(x=8, y=17, width=140, height=27)
 
+    # Submit
+    frame._submit_img = PhotoImage(file="assets/button_1.png")
 
-# ================ Confirm Password Name Section ====================
-confirm_passwordName_image = PhotoImage(file="assets/input_img.png")
-confirm_passwordName_image_Label = Label(
-    bg_image,
-    image=confirm_passwordName_image,
-    bg="#272A37"
-)
-confirm_passwordName_image_Label.place(x=293, y=380)
+    def signup():
+        # basic validation
+        if not (first_var.get().strip() and last_var.get().strip() and email_var.get().strip() and confirm_var.get().strip()):
+            messagebox.showerror("Error", "All Fields are Required")
+            return
+        if pwd_var.get() != confirm_var.get():
+            messagebox.showerror("Error", "Password and Confirm Password didn't match")
+            return
 
-confirm_passwordName_text = Label(
-    confirm_passwordName_image_Label,
-    text="Confirm Password",
-    fg="#FFFFFF",
-    font=("yu gothic ui SemiBold", 13 * -1),
-    bg="#3D404B"
-)
-confirm_passwordName_text.place(x=25, y=0)
+        try:
+            conn = sqlite3.connect(db_path)
+            db_utils.create_account(conn, first_var.get().strip(), last_var.get().strip(), email_var.get().strip(), pwd_var.get())
+            conn.close()
+            # clear
+            first_var.set("")
+            last_var.set("")
+            email_var.set("")
+            pwd_var.set("")
+            confirm_var.set("")
+            messagebox.showinfo('Success', "New Account Created Successfully :)")
+            # Call success callback if provided
+            if callable(on_register_success):
+                on_register_success()
+        except Exception:
+            messagebox.showerror("Error", "Something went wrong, please try again :(")
 
-confirm_passwordName_icon = PhotoImage(file="assets/pass-icon.png")
-confirm_passwordName_icon_Label = Label(
-    confirm_passwordName_image_Label,
-    image=confirm_passwordName_icon,
-    bg="#3D404B"
-)
-confirm_passwordName_icon_Label.place(x=159, y=15)
+    submit_button = Button(bg_image, image=frame._submit_img, borderwidth=0, highlightthickness=0,
+                           relief="flat", activebackground="#272A37", cursor="hand2", command=signup)
+    submit_button.place(x=130, y=460, width=333, height=65)
 
-confirm_passwordName_entry = Entry(
-    confirm_passwordName_image_Label,
-    bd=0,
-    bg="#3D404B",
-    highlightthickness=0,
-    font=("yu gothic ui SemiBold", 16 * -1),
-)
-confirm_passwordName_entry.place(x=8, y=17, width=140, height=27)
+    # small footer
+    frame._footer_img = PhotoImage(file="assets/headerText_image.png")
+    Label(bg_image, image=frame._footer_img, bg="#272A37").place(x=650, y=530)
+    Label(bg_image, text="Luke Ezekiel B. Abad", fg="#FFFFFF", font=("yu gothic ui bold", 20 * -1),
+          bg="#272A37").place(x=700, y=530)
 
-# =============== Submit Button ====================
-submit_buttonImage = PhotoImage(
-    file="assets/button_1.png")
-submit_button = Button(
-    bg_image,
-    image=submit_buttonImage,
-    borderwidth=0,
-    highlightthickness=0,
-    relief="flat",
-    activebackground="#272A37",
-    cursor="hand2",
-)
-submit_button .place(x=130, y=460, width=333, height=65)
-
-# ================ Header Text Down ====================
-headerText_image_down = PhotoImage(file="assets/headerText_image.png")
-headerText_image_label3 = Label(
-    bg_image,
-    image=headerText_image_down,
-    bg="#272A37"
-)
-headerText_image_label3.place(x=650, y=530)
-
-headerText3 = Label(
-    bg_image,
-    text="Luke Ezekiel B. Abad",
-    fg="#FFFFFF",
-    font=("yu gothic ui bold", 20 * -1),
-    bg="#272A37"
-)
-headerText3.place(x=700, y=530)
+    return frame
 
 
-window.resizable(False, False)
-window.mainloop()
+if __name__ == "__main__":
+    # Quick manual run for development
+    from tkinter import Tk
+
+    root = Tk()
+    root.geometry('1240x650+100+100')
+    frm = build_register_frame(root, "Database/AccountSystem.db")
+    frm.pack(fill='both', expand=True)
+    root.mainloop()
