@@ -37,7 +37,11 @@ def main():
     success = Frame(root)
     account = Frame(root)
     for frame in (sign_in, sign_up, success, account):
-        frame.grid(row=0, column=0, sticky="nsew")
+           frame.grid(row=0, column=0, sticky="nsew")
+    
+    # Configure grid weights so frames expand to fill window
+    root.grid_rowconfigure(0, weight=1)
+    root.grid_columnconfigure(0, weight=1)
 
     def show_frame(frame):
         frame.tkraise()

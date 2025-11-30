@@ -65,6 +65,7 @@ def open_main_app(parent=None, on_logout=None):
         # Orchestrator mode: create a frame within parent
         owns_root = False
         frame = Frame(parent)
+        frame.pack(fill='both', expand=True)
 
     # UI Elements (all local to this frame)
     Label(frame, text="Electric Bill Entry", font=("Arial", 16, "bold")).pack(pady=10)
