@@ -85,7 +85,8 @@ def main():
     # show login by default
     show_frame(sign_in)
 
-    root.resizable(False, False)
+    # Allow window to be resized so UI can be responsive
+    root.resizable(True, True)
     root.mainloop()
 
 
